@@ -1,0 +1,22 @@
+#!/usr/bin/env python3
+
+import click
+from plumbum.cmd import grep, cat
+
+@click.command()
+@click.argument("filename")
+@click.option("--comment-token", "-t", default = "#", show_default=True,
+                help = "Set the comment token.")
+@click.option("--context",       "-c", default = 0,   show_default=True,
+                help = "Display N preceding comment line(s).")
+@click.option("--no-separators", "-v", is_flag = True,
+                help = "Avoid displaying context separators.")
+def cli(filename, comment_token, context, no_separators):
+    click.echo(comment_token)
+    output = (cat[filename] | grep["-v", "^$"] | grep["-v", "^"+comment_token, "-B", context])
+    if no_separators:
+        output = (output | grep["-v", "^--"])
+    click.echo(output())
+
+if __name__ == '__main__':
+     cli()
